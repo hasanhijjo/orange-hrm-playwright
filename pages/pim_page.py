@@ -30,3 +30,4 @@ class PIMPage:
             self._confirm_password.fill(password)
 
         self._save_button.click()
+        

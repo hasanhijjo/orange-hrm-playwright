@@ -1,4 +1,4 @@
-
+import time
 from pages.login_page import LoginPage
 from pages.pim_page import PIMPage
 
@@ -23,6 +23,8 @@ def test_add_employee_scenarios(page):
     page.wait_for_selector("text=Personal Details")
     print("تم إضافة الموظف الأول بنجاح (بدون بيانات دخول)")
 
+    unique_id = int(time.time())
+    random_username = f"hassan_{unique_id}"
 
     page.get_by_role("link", name="PIM").click()
 
@@ -32,9 +34,13 @@ def test_add_employee_scenarios(page):
         fname="Hassan",
         lname="WithLogin",
         create_login=True,
-        user_name="hassan.tester.2026",
+        user_name=random_username,
         password="Password123!"
     )
+
+
+    page.wait_for_url("**/viewPersonalDetails/**", timeout=45000)
+    print(f"تم إضافة الموظف الثاني بنجاح باليوزر: {random_username}")
 
     page.wait_for_selector("text=Personal Details")
     print("تم إضافة الموظف الثاني بنجاح (مع بيانات دخول)")

@@ -1,68 +1,43 @@
+"""Module for PIM Employee List Page Objects."""
+
+
 class PIMPage:
-    """Page Object Model for the PIM (Personal Information Management) page."""
+    """Handle PIM page locators using robust scoped filters."""
 
     def __init__(self, page):
         self.page = page
 
-        # Navigation
-        self._pim_nav = page.get_by_role("link", name="PIM")
-        self._add_employee_nav = page.get_by_role("link", name="Add Employee")
 
-        # Employee fields
-        self._first_name = page.get_by_placeholder("First Name")
-        self._last_name = page.get_by_placeholder("Last Name")
+        self._name_group = page.locator(".oxd-input-group").filter(has_text="Employee Name")
+        self._id_group = page.locator(".oxd-input-group").filter(has_text="Employee Id")
 
-        # Login details toggle
-        self._login_details_switch = page.locator(".oxd-switch-input")
+        self._search_btn = page.get_by_role("button", name="Search")
+        self._reset_btn = page.get_by_role("button", name="Reset")
 
-        # Login fields (باستخدام locators دقيقة)
-        self._login_fields = {
-            "username": page.locator("//label[text()='Username']/following::input[1]"),
-            "password": page.locator("//label[text()='Password']/following::input[1]"),
-            "confirm_password": page.locator("//label[text()='Confirm Password']/following::input[1]"),
-        }
+    def search_employee(self, name=None, emp_id=None):
+        """Perform search by targeting inputs within their respective groups."""
+        self._reset_btn.click()
 
-        # Buttons
-        self._save_button = page.get_by_role("button", name="Save")
+        if name:
 
-    # Navigation methods
-    def go_to_pim_page(self):
-        """Navigate to the main PIM page."""
-        self._pim_nav.click()
+            name_input = self._name_group.get_by_placeholder("Type for hints...")
+            name_input.wait_for(state="visible")
+            name_input.fill(name)
 
-    def go_to_add_employee(self):
-        """Navigate to the Add Employee page."""
-        self._add_employee_nav.click()
+        if emp_id:
 
-    # Action method
-    def add_employee(self, first_name, last_name, create_login=False, login_details=None):
-        """
-        Add a new employee.
+            id_input = self._id_group.locator("input")
+            id_input.wait_for(state="visible")
+            id_input.fill(emp_id)
 
-        Args:
-            first_name (str): Employee first name.
-            last_name (str): Employee last name.
-            create_login (bool): Whether to create login credentials.
-            login_details (dict): Dictionary with keys 'username' and 'password'.
-        """
-        # Fill basic employee info
-        self._first_name.fill(first_name)
-        self._last_name.fill(last_name)
+        self._search_btn.click()
 
-        # Fill login credentials if needed
-        if create_login and login_details:
-            # اضغط على زر إنشاء بيانات تسجيل الدخول
-            self._login_details_switch.click()
+        self.page.wait_for_timeout(2000)
 
-            # انتظر ظهور الحقول قبل الملء
-            self._login_fields["username"].wait_for(state="visible", timeout=10000)
-            self._login_fields["password"].wait_for(state="visible", timeout=10000)
-            self._login_fields["confirm_password"].wait_for(state="visible", timeout=10000)
+    def has_no_results_message(self):
+        """Verify if 'No Records Found' span is visible in the table."""
+        return self.page.locator("span").get_by_text("No Records Found").is_visible()
 
-            # املأ الحقول
-            self._login_fields["username"].fill(login_details["username"])
-            self._login_fields["password"].fill(login_details["password"])
-            self._login_fields["confirm_password"].fill(login_details["password"])
-
-        # اضغط حفظ بعد ملء البيانات
-        self._save_button.click()
+    def is_record_visible(self):
+        """Verify if at least one employee record is displayed."""
+        return not self.has_no_results_message()

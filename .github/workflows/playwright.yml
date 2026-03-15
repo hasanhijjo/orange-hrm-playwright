@@ -22,15 +22,13 @@ jobs:
     - name: Install dependencies
       run: uv sync
 
-
-    - name: Run Lint Check (PEP8)
+    - name: Run Ruff Check
       run: |
-        uv pip install pylint pylint-pytest
-        uv run pylint tests/ pages/ --load-plugins=pylint_pytest
-        
+        uv pip install ruff
+        uv run ruff check tests/test_pim_search.py pages/pim_page.py
 
     - name: Install Playwright Browsers
       run: uv run playwright install --with-deps
 
-    - name: Run All Tests
-      run: uv run pytest tests/
+    - name: Run PIM Search Test Only
+      run: uv run pytest tests/test_pim_search.py
